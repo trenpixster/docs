@@ -1,130 +1,344 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
+    "title": "Merged API Specification",
     "version": "1.0.0"
   },
-  "servers": [
-    {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
   "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
+    "/v1/search/": {
+      "post": {
+        "tags": [
+          "public_search"
+        ],
+        "summary": "Post",
+        "description": "Initiate a search.",
+        "operationId": "post_public_v1_search__post",
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
+            "name": "x-quench-token",
+            "in": "header",
+            "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "title": "X-Quench-Token"
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
         "requestBody": {
-          "description": "Plant to add to the store",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/_PublicV1SearchRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
-          "200": {
-            "description": "plant response",
+          "202": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/_PublicV1SearchResponse-Input"
                 }
               }
             }
           },
-          "400": {
-            "description": "unexpected error",
+          "401": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "detail": "Token validation failed: Auth header/s missing or invalid."
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
                 }
               }
-            }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "detail": "Internal Server Error. Please contact support for more information."
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/v1/search/{uuid}": {
+      "get": {
+        "tags": [
+          "public_search"
+        ],
+        "summary": "Get",
+        "description": "Retrieve a search result by UUID.",
+        "operationId": "get_public_v1_search__uuid__get",
         "parameters": [
           {
-            "name": "id",
+            "name": "uuid",
             "in": "path",
-            "description": "ID of plant to delete",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "title": "Uuid"
+            }
+          },
+          {
+            "name": "x-quench-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "title": "X-Quench-Token"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/_PublicV1SearchResponse-Output"
                 }
               }
             }
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_PublicV1SearchResponse-Input"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "detail": "Token validation failed: Auth header/s missing or invalid."
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "detail": "Internal Server Error. Please contact support for more information."
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/public/v1-new/chat/": {
+      "post": {
+        "tags": [
+          "public_chat"
+        ],
+        "summary": "Post",
+        "description": "Start a chat session.",
+        "operationId": "post_public_v1_new_chat__post",
+        "parameters": [
+          {
+            "name": "x-quench-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "title": "X-Quench-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/_PublicV1ChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_PublicV1ChatResponse-Input"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "detail": "Token validation failed: Auth header/s missing or invalid."
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "detail": "Internal Server Error. Please contact support for more information."
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/public/v1-new/chat/{uuid}": {
+      "get": {
+        "tags": [
+          "public_chat"
+        ],
+        "summary": "Get",
+        "description": "Retrieve a chat session by UUID.",
+        "operationId": "get_public_v1_new_chat__uuid__get",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Uuid"
+            }
+          },
+          {
+            "name": "x-quench-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "title": "X-Quench-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_PublicV1ChatResponse-Output"
+                }
+              }
+            }
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_PublicV1ChatResponse-Input"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "detail": "Token validation failed: Auth header/s missing or invalid."
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "detail": "Internal Server Error. Please contact support for more information."
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/_ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         }
       }
@@ -132,64 +346,328 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
+      "_ApiErrorResponse": {
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
+          "success": {
+            "type": "boolean",
+            "title": "Success"
           },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+          "detail": {
+            "type": "string",
+            "title": "Detail"
           }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "detail"
+        ],
+        "title": "ApiErrorResponse",
+        "examples": [
           {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
+            "detail": "Bad asset. Please contact support for more information.",
+            "success": false
           }
         ]
       },
-      "Error": {
+      "_PublicV1ChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "origin_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid4"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Id"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id",
+            "description": "The unique identifier of the asset that was provided on asset creation."
+          }
+        },
+        "type": "object",
         "required": [
-          "error",
           "message"
         ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
+        "title": "PublicV1ChatRequest",
+        "examples": [
+          {
+            "message": "How to build customer archetypes?"
           }
-        }
+        ]
+      },
+      "_PublicV1ChatResponse-Input": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PublicV1ChatDataResponse-Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "data"
+        ],
+        "title": "PublicV1ChatResponse",
+        "examples": [
+          {
+            "data": {
+              "history": [
+                {
+                  "citations": {},
+                  "content": "What are the most powerful outbound marketing techniques?",
+                  "role": "user"
+                }
+              ],
+              "status": "Pending",
+              "uuid": "51de5828-6d5f-4b60-aa10-38bb2919d00f"
+            },
+            "success": true
+          },
+          {
+            "data": {
+              "history": [
+                {
+                  "citations": {},
+                  "content": "What are the most powerful outbound marketing techniques?",
+                  "role": "user"
+                },
+                {
+                  "citations": {
+                    "1": {
+                      "description": "Experts guide to using Linkedin to expand your network and generate quality leads.",
+                      "end": 10,
+                      "external_url": "https://www.example.com",
+                      "length_secs": 10,
+                      "quench_url": "https://www.example.com/quench",
+                      "score": 0.69,
+                      "start": 0,
+                      "thumbnail_url": "https://www.example.com/thumbnail.jpg",
+                      "title": "How to use LinkedIn for B2B lead generation",
+                      "type": "video",
+                      "uuid": "1"
+                    }
+                  },
+                  "content": "The most powerful outbound marketing techniques are...[1]",
+                  "role": "assistant"
+                }
+              ],
+              "status": "Answered",
+              "uuid": "51de5828-6d5f-4b60-aa10-38bb2919d00f"
+            },
+            "success": true
+          }
+        ]
+      },
+      "_PublicV1ChatResponse-Output": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PublicV1ChatDataResponse-Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "data"
+        ],
+        "title": "PublicV1ChatResponse",
+        "examples": [
+          {
+            "data": {
+              "history": [
+                {
+                  "citations": {},
+                  "content": "What are the most powerful outbound marketing techniques?",
+                  "role": "user"
+                }
+              ],
+              "status": "Pending",
+              "uuid": "51de5828-6d5f-4b60-aa10-38bb2919d00f"
+            },
+            "success": true
+          },
+          {
+            "data": {
+              "history": [
+                {
+                  "citations": {},
+                  "content": "What are the most powerful outbound marketing techniques?",
+                  "role": "user"
+                },
+                {
+                  "citations": {
+                    "1": {
+                      "description": "Experts guide to using Linkedin to expand your network and generate quality leads.",
+                      "end": 10,
+                      "external_url": "https://www.example.com",
+                      "length_secs": 10,
+                      "quench_url": "https://www.example.com/quench",
+                      "score": 0.69,
+                      "start": 0,
+                      "thumbnail_url": "https://www.example.com/thumbnail.jpg",
+                      "title": "How to use LinkedIn for B2B lead generation",
+                      "type": "video",
+                      "uuid": "1"
+                    }
+                  },
+                  "content": "The most powerful outbound marketing techniques are...[1]",
+                  "role": "assistant"
+                }
+              ],
+              "status": "Answered",
+              "uuid": "51de5828-6d5f-4b60-aa10-38bb2919d00f"
+            },
+            "success": true
+          }
+        ]
+      },
+      "_PublicV1SearchRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "PublicV1SearchRequest",
+        "examples": [
+          {
+            "query": "What are the most powerful outbound marketing techniques?"
+          }
+        ]
+      },
+      "_PublicV1SearchResponse-Input": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PublicV1SearchDataResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "data"
+        ],
+        "title": "PublicV1SearchResponse",
+        "examples": [
+          {
+            "data": {
+              "citations": {},
+              "content": "",
+              "status": "Pending",
+              "uuid": "51de5828-6d5f-4b60-aa10-38bb2919d00f"
+            },
+            "success": true
+          },
+          {
+            "data": {
+              "citations": {
+                "1": {
+                  "description": "Experts guide to using Linkedin to expand your network and generate quality leads.",
+                  "end": 10,
+                  "external_url": "https://www.example.com",
+                  "length_secs": 10,
+                  "quench_url": "https://www.example.com/quench",
+                  "score": 0.69,
+                  "start": 0,
+                  "thumbnail_url": "https://www.example.com/thumbnail.jpg",
+                  "title": "How to use LinkedIn for B2B lead generation",
+                  "type": "video",
+                  "uuid": "1"
+                }
+              },
+              "content": "There are many highly impactful outbound marketing techniques. There include: linkedin lead generation[1]...",
+              "status": "Answered",
+              "uuid": "51de5828-6d5f-4b60-aa10-38bb2919d00f"
+            },
+            "success": true
+          }
+        ]
+      },
+      "_PublicV1SearchResponse-Output": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PublicV1SearchDataResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "data"
+        ],
+        "title": "PublicV1SearchResponse",
+        "examples": [
+          {
+            "data": {
+              "citations": {},
+              "content": "",
+              "status": "Pending",
+              "uuid": "51de5828-6d5f-4b60-aa10-38bb2919d00f"
+            },
+            "success": true
+          },
+          {
+            "data": {
+              "citations": {
+                "1": {
+                  "description": "Experts guide to using Linkedin to expand your network and generate quality leads.",
+                  "end": 10,
+                  "external_url": "https://www.example.com",
+                  "length_secs": 10,
+                  "quench_url": "https://www.example.com/quench",
+                  "score": 0.69,
+                  "start": 0,
+                  "thumbnail_url": "https://www.example.com/thumbnail.jpg",
+                  "title": "How to use LinkedIn for B2B lead generation",
+                  "type": "video",
+                  "uuid": "1"
+                }
+              },
+              "content": "There are many highly impactful outbound marketing techniques. There include: linkedin lead generation[1]...",
+              "status": "Answered",
+              "uuid": "51de5828-6d5f-4b60-aa10-38bb2919d00f"
+            },
+            "success": true
+          }
+        ]
       }
     },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
-      }
+    "securitySchemes": {}
+  },
+  "servers": [
+    {
+      "url": "https://api.quench.solutions"
     }
-  }
+  ]
 }
